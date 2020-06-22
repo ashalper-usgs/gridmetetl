@@ -1,7 +1,6 @@
 """Console script for gridmetetl."""
 from gridmetetl.etl import FpoNHM
 import argparse
-import sys
 import datetime
 from pathlib import Path
 
@@ -128,8 +127,7 @@ def main(parser, args):
     print('starting Script', flush=True)
     fp = FpoNHM()
     print('instantiated', flush=True)
-    # initialize(self, iptpath, optpath, weights_file, type=None, days=None, start_date=None, end_date=None)
-    # ready = fp.initialize(idir, odir, wght_file, extract_type, numdays, startdate, enddate, file_prefix)
+
     try:
         ready = fp.initialize(gm_vars, idir, odir, wght_file, etype=extract_type, days=numdays,
                               start_date=startdate, end_date=enddate,
@@ -148,7 +146,6 @@ def main(parser, args):
                 fp.setnumdays(numdays - 1)
                 print('initalized\n', flush=True)
                 print('running', flush=True)
-                status = fp.run_weights()
                 print('finished running', flush=True)
                 fp.finalize()
                 print('finalized', flush=True)
