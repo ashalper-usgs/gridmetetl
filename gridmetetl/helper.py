@@ -18,17 +18,17 @@ def getaverage(data, wghts):
 def np_get_wval(ndata, wghts, hru_id=0):
     """
     Returns weighted average of ndata with weights = grp
-    1) mdata = the subset of values associated with the gridmet id's that are mapped to hru_id.
-    2) Some of these values may have nans if the gridmet id is outside of conus so only return values
-    that are inside of conus
-    3) this means that hru's that are entirely outside of conus will return nans which will ultimately,
+    1) mdata = the subset of values associated with the gridMET IDs that are mapped to hru_id.
+    2) Some of these values may have nans if the gridMET ID is outside of CONUS so only return values
+    that are inside of CONUS
+    3) this means that HRUs that are entirely outside of CONUS will return nans which will ultimately,
     outside of this function get assigned zero's.
     4) the value is assigned the weighted average
     :param ndata: float array of data values
     :param wghts: float array of weights
-    :param hru_id hru id number
+    :param hru_id HRU ID number
     :return: numpy weighted averaged - masked to deal with nans associated with
-            ndata that is outside of the conus.
+            ndata that is outside of the CONUS.
     """
     mdata = np.ma.masked_array(ndata, np.isnan(ndata))
     tmp = np.ma.average(mdata, weights=wghts)
@@ -51,12 +51,12 @@ def get_gm_url(type, dataset, numdays=None, startdate=None, enddate=None, ctype=
     :param dataset: datset to retrieve can be:
         'tmax', 'tmin', 'ppt'
     :param ctype: Type of url to retrieve:
-        'GridMet':
-    :return: URL for retrieving GridMet subset data and payload of options
+        'gridMET':
+    :return: URL for retrieving gridMET subset data and payload of options
     """
     sformat = "%Y-%m-%d"
     if type == 'days':
-        dt1 = dt.timedelta(days=1)  # because Gridmet data release today is yesterdays data
+        dt1 = dt.timedelta(days=1)  # because gridMET data release today is yesterday's data
         dt2 = dt.timedelta(days=numdays)
 
         end = dt.datetime.now() - dt1
