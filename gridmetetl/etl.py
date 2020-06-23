@@ -34,8 +34,8 @@ class FpoNHM:
 
         :param  : number of days past to retrieve
         :param climsource: Constant for now but may have multiple
-            choice for data sources in the future.  Currently default is
-            GridMet:  http://www.climatologylab.org/gridmet.html
+            choice for data sources in the future. Currently default is
+            gridMET:  http://www.climatologylab.org/gridmet.html
         """
         self.wghts_id = None
         self.climsource = climsource
@@ -140,7 +140,7 @@ class FpoNHM:
             1) initialize geopandas dataframe of concatenated hru_shapefiles
             2) initialize climate data using xarray
         :param ivars: list of vars to extract.  limited to ['tmax', 'tmin', 'ppt', 'rhmax', 'rhmin', 'ws', 'srad']
-        :param iptpath: Input path, downloaded gridmet files will be saved here.  Must also contain shapefile used to
+        :param iptpath: Input path, downloaded gridMET files will be saved here. Must also contain shapefile used to
                         generate the weights file.
         :param optpath: Path to write newly generated netCDF file containing values for vars for each HRU
         :param weights_file: Weights file, based on shapefile in iptpath that was used to generate weights file
@@ -148,7 +148,7 @@ class FpoNHM:
         :param days: if extraction type == days, then # days to extract from most recently available date
         :param start_date: if extraction type date then start date in 'YYYY-MM-DD"
         :param end_date: if extraction type date then end date in 'YYYY-MM-DD"
-        :param fileprefix: String to add to both downloaded gridmet data and mapped HRU file
+        :param fileprefix: String to add to both downloaded gridMET data and mapped HRU file
 
         :return: success or failure
         """
@@ -253,14 +253,14 @@ class FpoNHM:
             except HTTPError as http_err:
                 print(f'HTTP error occured: {http_err}', flush=True)
                 if self.numdays == 1:
-                    sys.exit("numdays == 1: Gridmet not updated - EXITING")
+                    sys.exit("numdays == 1: gridMET not updated - EXITING")
                 else:
-                    sys.exit("GridMet not available or a bad request - EXITING")
+                    sys.exit("gridMET not available or a bad request - EXITING")
             except Exception as err:
                 sys.exit(f'Other error occured: {err}')
             else:
                 if verbose:
-                    print(f'Gridmet variable {var} retrieved: {ncfile[-1]}', flush=True)
+                    print(f'gridMET variable {var} retrieved: {ncfile[-1]}', flush=True)
         self.ds = xr.open_mfdataset(ncfile, combine='by_coords')
 
         self.lat_h = self.ds['lat']
@@ -273,7 +273,7 @@ class FpoNHM:
         self.latshape = ts['lat']
 
         if verbose:
-            print(f'Gridmet returned days = {self.dayshape} and expected number of days {self.numdays}', flush=True)
+            print(f'gridMET returned days = {self.dayshape} and expected number of days {self.numdays}', flush=True)
         if self.dayshape == self.numdays:
             return True
         else:
@@ -398,7 +398,7 @@ class FpoNHM:
                             d_srad[i] = tmpval
                 except KeyError:
                     # This except block protects against HRUs that are completely
-                    # outside the footprint of Gridmet.  If so, they will have no value
+                    # outside the footprint of gridMET. If so, they will have no value
                     # in the weights file and so return default value.
                     if 'tmax' in self.vars:
                         d_tmax[i] = netCDF4.default_fillvals['f8']
