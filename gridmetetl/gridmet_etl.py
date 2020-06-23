@@ -59,10 +59,14 @@ def parser():
                            default=None, required=True)
 
     my_parser.add_argument('-v', '--variables', nargs='*', type=str,
-                           help='over-ride default vars',
+                           help='override default vars',
                            choices=['tmax', 'tmin', 'ppt', 'rhmax', 'rhmin', 'ws', 'srad'],
                            metavar='GridMet_Variables',
                            default=['tmax', 'tmin', 'ppt', 'rhmax', 'rhmin', 'ws'])
+    
+    my_parser.add_argument('--verbose', help='output progress messages',
+                           action='store_true')
+    
     return my_parser
 
 def args(parser):
@@ -123,15 +127,18 @@ def main(parser, args):
     wght_file = my_args.weightsfile
     file_prefix = get_file_prefix(args)
     gm_vars = my_args.variables
+    verbose = my_args.verbose
 
-    print('starting Script', flush=True)
+    if verbose:
+        print('starting Script', flush=True)
     fp = FpoNHM()
-    print('instantiated', flush=True)
+    if verbose:
+        print('instantiated', flush=True)
 
     try:
         ready = fp.initialize(gm_vars, idir, odir, wght_file, etype=extract_type, days=numdays,
                               start_date=startdate, end_date=enddate,
-                              fileprefix=file_prefix)
+                              fileprefix=file_prefix, verbose=verbose)
         if ready:
             print('initalized\n', flush=True)
             print('running', flush=True)
@@ -144,11 +151,13 @@ def main(parser, args):
             if extract_type == 'days':
                 print('Gridmet not updated continue with numdays -1', flush=True)
                 fp.setnumdays(numdays - 1)
-                print('initalized\n', flush=True)
-                print('running', flush=True)
-                print('finished running', flush=True)
+                if verbose:
+                    print('initalized\n', flush=True)
+                    print('running', flush=True)
+                    print('finished running', flush=True)
                 fp.finalize()
-                print('finalized', flush=True)
+                if verbose:
+                    print('finalized', flush=True)
                 return 0
             else:
                 print('error: extract did not return period specified, Gridmet not updated', flush=True)
@@ -157,7 +166,6 @@ def main(parser, args):
     except NameError:
         print('An error: ')
         raise
-
 
 
 if __name__ == "__main__":
