@@ -64,8 +64,8 @@ def parser():
                            metavar='GridMet_Variables',
                            default=['tmax', 'tmin', 'ppt', 'rhmax', 'rhmin', 'ws'])
     
-    my_parser.add_argument('--verbose', help='output progress messages',
-                           action='store_true')
+    my_parser.add_argument('-V', '--verbose', help='output progress messages',
+                           action='store_true', default=False, required=False)
     
     return my_parser
 
