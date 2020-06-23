@@ -69,7 +69,7 @@ From your conda environment created above:
       -i input_path, --inpath input_path
                             input_path (location of HRU shapefiles)
       -o output_path, --outpath output_path
-                            Output path (location of netcdf output files by
+                            Output path (location of netCDF output files by
                             shapefile output)
       -w weight_file, --weightsfile weight_file
                             path/weight.csv - path/name of weight file

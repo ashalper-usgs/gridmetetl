@@ -15,15 +15,15 @@ import netCDF4
 
 
 class FpoNHM:
-    """ Class for fetching climate data and parsing into netcdf
+    """ Class for fetching climate data and parsing into netCDF
         input files for use with the USGS operational National Hydrologic
         Model (oNHM).  Workflow:
             1) Initialize(): fetch climate data
             2) Run(): map/interpolate onto hru
-            3) Finalize(): write netcdf input files
+            3) Finalize(): write netCDF input files
         Mapping options:
             1) weighted average based on intersection area of hru
-                with netcdf file cells.
+                with netCDF file cells.
             2) rasterstats - zonal averaging
 
     """
@@ -84,7 +84,7 @@ class FpoNHM:
         self.start_date = None
         self.end_date = None
 
-        # handles to netcdf climate data
+        # handles to netCDF climate data
         # Coordinates
         self.lat_h = None
         self.lon_h = None
@@ -142,7 +142,7 @@ class FpoNHM:
         :param ivars: list of vars to extract.  limited to ['tmax', 'tmin', 'ppt', 'rhmax', 'rhmin', 'ws', 'srad']
         :param iptpath: Input path, downloaded gridmet files will be saved here.  Must also contain shapefile used to
                         generate the weights file.
-        :param optpath: Path to write newly generated netcdf file containing values for vars for each HRU
+        :param optpath: Path to write newly generated netCDF file containing values for vars for each HRU
         :param weights_file: Weights file, based on shapefile in iptpath that was used to generate weights file
         :param etype: extraction time, can be days or date
         :param days: if extraction type == days, then # days to extract from most recently available date
@@ -197,7 +197,7 @@ class FpoNHM:
         if self.type == 'date':
             self.numdays = ((self.end_date - self.start_date).days + 1)
 
-        # Download netcdf subsetted data
+        # Download netCDF subsetted data
         ncfile = []
         for var in self.vars:
             try:
