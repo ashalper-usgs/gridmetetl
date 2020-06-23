@@ -19,10 +19,10 @@ class FpoNHM:
         input files for use with the USGS operational National Hydrologic
         Model (oNHM).  Workflow:
             1) Initialize(): fetch climate data
-            2) Run(): map/interpolate onto hru
+            2) Run(): map/interpolate onto HRU
             3) Finalize(): write netCDF input files
         Mapping options:
-            1) weighted average based on intersection area of hru
+            1) weighted average based on intersection area of HRU
                 with netCDF file cells.
             2) rasterstats - zonal averaging
 
@@ -69,7 +69,7 @@ class FpoNHM:
         self.dssrad = None
         self.ds = None
 
-        # Geopandas dataframe that will hold hru id and geometry
+        # Geopandas dataframe that will hold HRU id and geometry
         self.gdf = None
         self.gdf1 = None
 
@@ -106,7 +106,7 @@ class FpoNHM:
         # num HRUs
         self.num_hru = None
 
-        # grouby hru_id_nat on wieghts file
+        # group by hru_id_nat on weights file
         self.unique_hru_ids = None
 
         # numpy arrays to store mapped climate data
@@ -148,7 +148,7 @@ class FpoNHM:
         :param days: if extraction type == days, then # days to extract from most recently available date
         :param start_date: if extraction type date then start date in 'YYYY-MM-DD"
         :param end_date: if extraction type date then end date in 'YYYY-MM-DD"
-        :param fileprefix: String to add to both downloaded gridment data and mapped hru file
+        :param fileprefix: String to add to both downloaded gridmet data and mapped HRU file
 
         :return: success or failure
         """
@@ -283,8 +283,8 @@ class FpoNHM:
         # grab the hru_id from the weights file and use as identifier below
         self.wghts_id = wght_uofi.columns[1]
 
-        # this geodataframe merges all hru-ids dissolves so the length of the index
-        # equals the number of hrus
+        # this geodataframe merges all HRU-ids dissolves so the length of the index
+        # equals the number of HRUs
         self.gdf1 = self.gdf.sort_values(self.wghts_id).dissolve(by=self.wghts_id)
         self.num_hru = len(self.gdf1.index)
 
@@ -407,7 +407,7 @@ class FpoNHM:
                         d_srad[i] = netCDF4.default_fillvals['f8']
 
                 if i % 10000 == 0:
-                    print(f'    Processing hru {i}', flush=True)
+                    print(f'    Processing HRU {i}', flush=True)
 
             if 'tmax' in self.vars:
                 self.np_tmax[day, :] = d_tmax[:]
