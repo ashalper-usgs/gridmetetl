@@ -51,7 +51,7 @@ def parser():
                            default=None, required=True)
 
     my_parser.add_argument('-o', '--outpath', type=valid_path,
-                        help='Output path (location of netcdf output files by shapefile output)', metavar='output_path',
+                        help='Output path (location of netCDF output files by shapefile output)', metavar='output_path',
                         default=None, required=True)
 
     my_parser.add_argument('-w', '--weightsfile', type=valid_file,
@@ -151,7 +151,7 @@ def main(parser, args):
                 print('finalized', flush=True)
                 return 0
             else:
-                print('error: extract did not return period specified, Gridmet no updated', flush=True)
+                print('error: extract did not return period specified, Gridmet not updated', flush=True)
                 return 1
 
     except NameError:
