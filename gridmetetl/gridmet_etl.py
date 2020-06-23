@@ -130,7 +130,7 @@ def main(parser, args):
     verbose = my_args.verbose
 
     if verbose:
-        print('starting Script', flush=True)
+        print('starting script', flush=True)
     fp = FpoNHM()
     if verbose:
         print('instantiated', flush=True)
@@ -140,16 +140,19 @@ def main(parser, args):
                               start_date=startdate, end_date=enddate,
                               fileprefix=file_prefix, verbose=verbose)
         if ready:
-            print('initalized\n', flush=True)
-            print('running', flush=True)
+            if verbose:
+                print('initalized\n', flush=True)
+                print('running', flush=True)
             fp.run_weights()
-            print('finished running', flush=True)
+            if verbose:
+                print('finished running', flush=True)
             fp.finalize()
-            print('finalized', flush=True)
+            if verbose:
+                print('finalized', flush=True)
             return 0
         else:
             if extract_type == 'days':
-                print('Gridmet not updated continue with numdays -1', flush=True)
+                print('gridMET not updated continue with numdays -1', flush=True)
                 fp.setnumdays(numdays - 1)
                 if verbose:
                     print('initalized\n', flush=True)
@@ -160,7 +163,7 @@ def main(parser, args):
                     print('finalized', flush=True)
                 return 0
             else:
-                print('error: extract did not return period specified, Gridmet not updated', flush=True)
+                print('error: extract did not return period specified, gridMET not updated', flush=True)
                 return 1
 
     except NameError:
