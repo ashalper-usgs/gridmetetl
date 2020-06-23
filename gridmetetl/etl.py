@@ -134,7 +134,7 @@ class FpoNHM:
         fh.close()
 
     def initialize(self, ivars, iptpath, optpath, weights_file, etype=None, days=None,
-                   start_date=None, end_date=None, fileprefix='', verbose=None):
+                   start_date=None, end_date=None, fileprefix='', verbose=False):
         """
         Initialize the fp_ohm class:
             1) initialize geopandas dataframe of concatenated hru_shapefiles
@@ -154,20 +154,23 @@ class FpoNHM:
         """
         self.vars = ivars
         self.iptpath = Path(iptpath)
-        if verbose and self.iptpath.exists():
-            print(f'input path exists {self.iptpath}', flush=True)
+        if self.iptpath.exists():
+            if verbose:
+                print(f'input path exists {self.iptpath}', flush=True)
         else:
             sys.exit(f'input path does not exist: {self.iptpath} - EXITING')
 
         self.optpath = Path(optpath)
-        if verbose and self.optpath.exists():
-            print('output path exists', flush=True)
+        if self.optpath.exists():
+            if verbose:
+                print('output path exists', flush=True)
         else:
             sys.exit(f'output path does not exist: {self.optpath} - EXITING')
 
         self.wghts_file = Path(weights_file)
-        if verbose and self.wghts_file.exists():
-            print('weights file exists', self.wghts_file, flush=True)
+        if self.wghts_file.exists():
+            if verbose:
+                print('weights file exists', self.wghts_file, flush=True)
         else:
             sys.exit(f'weights file does not exist: {self.wghts_file} - EXITING')
         self.type = etype
@@ -176,11 +179,14 @@ class FpoNHM:
         self.end_date = end_date
         self.fileprefix = fileprefix
 
-        print(Path.cwd())
+        if verbose:
+            print(Path.cwd())
         if self.type == 'date':
-            print(f'start_date: {self.start_date.strftime("%Y-%m-%d")} and end_date: {self.end_date.strftime("%Y-%m-%d")}', flush=True)
+            if verbose:
+                print(f'start_date: {self.start_date.strftime("%Y-%m-%d")} and end_date: {self.end_date.strftime("%Y-%m-%d")}', flush=True)
         else:
-            print(f'number of days: {self.numdays}', flush=True)
+            if verbose:
+                print(f'number of days: {self.numdays}', flush=True)
         
         # glob.glob produces different results on Win and Linux. Adding sorted makes result consistent
         # glob is here because original nhm had multiple shapefiles
@@ -253,7 +259,8 @@ class FpoNHM:
             except Exception as err:
                 sys.exit(f'Other error occured: {err}')
             else:
-                print(f'Gridmet variable {var} retrieved: {ncfile[-1]}', flush=True)
+                if verbose:
+                    print(f'Gridmet variable {var} retrieved: {ncfile[-1]}', flush=True)
         self.ds = xr.open_mfdataset(ncfile, combine='by_coords')
 
         self.lat_h = self.ds['lat']
@@ -265,12 +272,13 @@ class FpoNHM:
         self.lonshape = ts['lon']
         self.latshape = ts['lat']
 
-        # if self.type == 'days':
-        print(f'Gridmet returned days = {self.dayshape} and expected number of days {self.numdays}', flush=True)
+        if verbose:
+            print(f'Gridmet returned days = {self.dayshape} and expected number of days {self.numdays}', flush=True)
         if self.dayshape == self.numdays:
             return True
         else:
-            print('returned and expected days not equal', flush=True)
+            if verbose:
+                print('returned and expected days not equal', flush=True)
             return False
 
     def run_weights(self):
