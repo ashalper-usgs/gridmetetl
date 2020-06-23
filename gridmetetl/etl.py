@@ -12,7 +12,7 @@ from datetime import datetime
 from pathlib import Path
 import numpy as np
 import netCDF4
-
+import progressbar
 
 class FpoNHM:
     """ Class for fetching climate data and parsing into netCDF
@@ -134,7 +134,7 @@ class FpoNHM:
         fh.close()
 
     def initialize(self, ivars, iptpath, optpath, weights_file, etype=None, days=None,
-                   start_date=None, end_date=None, fileprefix=''):
+                   start_date=None, end_date=None, fileprefix='', verbose=None):
         """
         Initialize the fp_ohm class:
             1) initialize geopandas dataframe of concatenated hru_shapefiles
@@ -154,22 +154,22 @@ class FpoNHM:
         """
         self.vars = ivars
         self.iptpath = Path(iptpath)
-        if self.iptpath.exists():
+        if verbose and self.iptpath.exists():
             print(f'input path exists {self.iptpath}', flush=True)
         else:
-            sys.exit(f'Input Path does not exist: {self.iptpath} - EXITING')
+            sys.exit(f'input path does not exist: {self.iptpath} - EXITING')
 
         self.optpath = Path(optpath)
-        if self.optpath.exists():
+        if verbose and self.optpath.exists():
             print('output path exists', flush=True)
         else:
-            sys.exit(f'Output Path does not exist: {self.optpath} - EXITING')
+            sys.exit(f'output path does not exist: {self.optpath} - EXITING')
 
         self.wghts_file = Path(weights_file)
-        if self.wghts_file.exists():
+        if verbose and self.wghts_file.exists():
             print('weights file exists', self.wghts_file, flush=True)
         else:
-            sys.exit(f'Weights file does not exist: {self.wghts_file} - EXITING')
+            sys.exit(f'weights file does not exist: {self.wghts_file} - EXITING')
         self.type = etype
         self.numdays = days
         self.start_date = start_date
@@ -178,21 +178,22 @@ class FpoNHM:
 
         print(Path.cwd())
         if self.type == 'date':
-            print(f'start_date: {self.start_date} and end_date: {self.end_date}', flush=True)
+            print(f'start_date: {self.start_date.strftime("%Y-%m-%d")} and end_date: {self.end_date.strftime("%Y-%m-%d")}', flush=True)
         else:
             print(f'number of days: {self.numdays}', flush=True)
+        
         # glob.glob produces different results on Win and Linux. Adding sorted makes result consistent
-        # filenames = sorted(glob.glob('*.shp'))
-        # use pathlib glob
         # glob is here because original nhm had multiple shapefiles
         filenames = sorted(self.iptpath.glob('*.shp'))
-        self.gdf = pd.concat([geopandas.read_file(f) for f in filenames], sort=True).pipe(geopandas.GeoDataFrame)
+        objs = []
+        for f in progressbar.progressbar(filenames):
+            objs.append(geopandas.read_file(f))
+        self.gdf = pd.concat(objs, sort=True).pipe(geopandas.GeoDataFrame)
         self.gdf.reset_index(drop=True, inplace=True)
 
-        print(f'the shapefile filenames read: {filenames}', flush=True)
-        print(f'the shapefile header is: {self.gdf.head()}', flush=True)
-
-        # self.num_hru = len(self.gdf.index)
+        if verbose:
+            print(f'the shapefile filenames read: {filenames}', flush=True)
+            print(f'the shapefile header is: {self.gdf.head()}', flush=True)
 
         if self.type == 'date':
             self.numdays = ((self.end_date - self.start_date).days + 1)
