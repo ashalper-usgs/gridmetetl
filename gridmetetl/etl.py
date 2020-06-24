@@ -1,18 +1,19 @@
 """Main module."""
 import geopandas
+import netCDF4
+import numpy as np
 import pandas as pd
-from netCDF4 import default_fillvals, Dataset
-from numpy import arange, dtype, float32, zeros, asarray
+import progressbar
+import requests
 import sys
 import xarray as xr
-from gridmetetl.helper import get_gm_url, np_get_wval, getaverage
-import requests
-from requests.exceptions import HTTPError
 from datetime import datetime
+from gridmetetl.helper import get_gm_url, np_get_wval, getaverage
+from netCDF4 import default_fillvals, Dataset
+from numpy import arange, dtype, float32, zeros, asarray
 from pathlib import Path
-import numpy as np
-import netCDF4
-import progressbar
+from requests.exceptions import HTTPError
+from time import perf_counter
 
 class FpoNHM:
     """ Class for fetching climate data and parsing into netCDF
@@ -50,8 +51,9 @@ class FpoNHM:
                 'srad': 'daily_mean_shortwave_radiation_at_surface'}
         self.vars = None
 
-        # type of retrieval (days) retrieve by previous number of days - used in operational mode
-        # or (date) used to retrieve specific period of time
+        # type of retrieval (days) retrieve by previous number of
+        # days: used in operational mode or (date) used to retrieve
+        # specific period of time
         self.type = None
 
         self.numdays = None
@@ -59,7 +61,8 @@ class FpoNHM:
         # prefix for file names - default is ''.
         self.fileprefix = None
 
-        # xarray containers for tempurature max, temperature min and precipitation
+        # xarray containers for temperature max., temperature min.,
+        # and precipitation
         self.dstmax = None
         self.dstmin = None
         self.dsppt = None
@@ -123,18 +126,24 @@ class FpoNHM:
 
         # Starting date based on numdays
         self.str_start = None
-
+        
     def write_extract_file(self, ivar, incfile, url, params):
         file = requests.get(url, params=params)
         file.raise_for_status()
-        tfile = self.iptpath / (self.fileprefix + ivar + (datetime.now().strftime('%Y_%m_%d')) + '.nc')
+        tfile = self.iptpath / (self.fileprefix + ivar +
+                                (datetime.now().strftime('%Y_%m_%d')) + '.nc')
         incfile.append(tfile)
         with open(tfile, 'wb') as fh:
             fh.write(file.content)
         fh.close()
 
-    def initialize(self, ivars, iptpath, optpath, weights_file, etype=None, days=None,
-                   start_date=None, end_date=None, fileprefix='', verbose=False):
+    def read_file(self, f):
+        gdf = geopandas.read_file(f)
+        return gdf
+        
+    def initialize(self, ivars, iptpath, optpath, weights_file,
+                   etype=None, days=None, start_date=None,
+                   end_date=None, fileprefix='', verbose=False):
         """
         Initialize the fp_ohm class:
             1) initialize geopandas dataframe of concatenated hru_shapefiles
@@ -172,7 +181,9 @@ class FpoNHM:
             if verbose:
                 print('weights file exists', self.wghts_file, flush=True)
         else:
-            sys.exit(f'weights file does not exist: {self.wghts_file} - EXITING')
+            sys.exit(
+                f'weights file does not exist: {self.wghts_file} - EXITING'
+            )
         self.type = etype
         self.numdays = days
         self.start_date = start_date
@@ -188,18 +199,15 @@ class FpoNHM:
             if verbose:
                 print(f'number of days: {self.numdays}', flush=True)
         
-        # glob.glob produces different results on Win and Linux. Adding sorted makes result consistent
-        # glob is here because original nhm had multiple shapefiles
+        # glob.glob produces different results on Windows and
+        # Linux. Adding sorted makes result consistent glob is here
+        # because original NHM had multiple shapefiles
         filenames = sorted(self.iptpath.glob('*.shp'))
         objs = []
         for f in progressbar.progressbar(filenames):
             objs.append(geopandas.read_file(f))
         self.gdf = pd.concat(objs, sort=True).pipe(geopandas.GeoDataFrame)
         self.gdf.reset_index(drop=True, inplace=True)
-
-        if verbose:
-            print(f'the shapefile filenames read: {filenames}', flush=True)
-            print(f'the shapefile header is: {self.gdf.head()}', flush=True)
 
         if self.type == 'date':
             self.numdays = ((self.end_date - self.start_date).days + 1)
@@ -292,8 +300,8 @@ class FpoNHM:
         # grab the hru_id from the weights file and use as identifier below
         self.wghts_id = wght_uofi.columns[1]
 
-        # this geodataframe merges all HRU-ids dissolves so the length of the index
-        # equals the number of HRUs
+        # this geodataframe merges all HRU IDs dissolves so the length
+        # of the index equals the number of HRUs
         self.gdf1 = self.gdf.sort_values(self.wghts_id).dissolve(by=self.wghts_id)
         self.num_hru = len(self.gdf1.index)
 
