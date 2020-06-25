@@ -25,18 +25,19 @@ def valid_file(s):
         raise argparse.ArgumentError(f'File does not exist: {s}')
 
 def parser():
-    my_parser = argparse.ArgumentParser(prog='gridmet_etl',
-                                    description='map gridded climate data to polygon using zonal area weighted mean')
+    my_parser = argparse.ArgumentParser(
+        prog='gridmet_etl',
+        description='map gridded climate data to polygon using zonal area weighted mean'
+    )
 
     my_parser.add_argument('-t', '--extract_type', type=str,
-                           help='extract method: (days) or (date)', metavar='extraction type',
-                           default=None, required=True, choices=['days', 'date'])
+                           help='extract method: (days) or (date)',
+                           metavar='extraction type', default=None,
+                           required=True, choices=['days', 'date'])
 
     my_parser.add_argument('-p', '--period', type=valid_date,
                            help='option: start date and end date of retrieval (YYYY-MM-DD)',
-                           metavar='(YYYY-MM-DD)',
-                           default=None,
-                           nargs=2)
+                           metavar='(YYYY-MM-DD)', default=None, nargs=2)
 
     my_parser.add_argument('-d', '--days', type=int,
                            help='option: number of days to retrieve; if specified take precedence over -s & -e option',
@@ -47,16 +48,16 @@ def parser():
                            metavar='output_file_prefix', default='')
 
     my_parser.add_argument('-i', '--inpath', type=valid_path,
-                           help='input_path (location of HRU shapefiles)', metavar='input_path',
-                           default=None, required=True)
+                           help='input_path (location of HRU shapefiles)',
+                           metavar='input_path', default=None, required=True)
 
     my_parser.add_argument('-o', '--outpath', type=valid_path,
                         help='Output path (location of netCDF output files by shapefile output)', metavar='output_path',
                         default=None, required=True)
 
     my_parser.add_argument('-w', '--weightsfile', type=valid_file,
-                           help='path/weight.csv - path/name of weight file', metavar='weight_file',
-                           default=None, required=True)
+                           help='path/weight.csv - path/name of weight file',
+                           metavar='weight_file', default=None, required=True)
 
     my_parser.add_argument('-v', '--variables', nargs='*', type=str,
                            help='override default vars',
@@ -136,7 +137,8 @@ def main(parser, args):
         print('instantiated', flush=True)
 
     try:
-        ready = fp.initialize(gm_vars, idir, odir, wght_file, etype=extract_type, days=numdays,
+        ready = fp.initialize(gm_vars, idir, odir, wght_file,
+                              etype=extract_type, days=numdays,
                               start_date=startdate, end_date=enddate,
                               fileprefix=file_prefix, verbose=verbose)
         if ready:
