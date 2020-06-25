@@ -1,9 +1,10 @@
 """Main module."""
+import concurrent.futures
 import geopandas
 import netCDF4
 import numpy as np
 import pandas as pd
-import progressbar
+import queue
 import requests
 import sys
 import xarray as xr
@@ -126,7 +127,10 @@ class FpoNHM:
 
         # Starting date based on numdays
         self.str_start = None
-        
+
+        # multithreading infrastructure
+        self.q = queue.Queue()
+
     def write_extract_file(self, ivar, incfile, url, params):
         file = requests.get(url, params=params)
         file.raise_for_status()
@@ -137,10 +141,16 @@ class FpoNHM:
             fh.write(file.content)
         fh.close()
 
-    def read_file(self, f):
-        gdf = geopandas.read_file(f)
-        return gdf
-        
+    def read_file(self, filename):
+        self.q.put(geopandas.read_file(filename))
+        print(f'read {str(filename)}')
+    
+    def read_files(self, filenames):
+        with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+            executor.map(self.read_file, filenames)
+        self.gdf = pd.concat(list(self.q.queue), sort=True).pipe(geopandas.GeoDataFrame)
+        self.gdf.reset_index(drop=True, inplace=True)
+
     def initialize(self, ivars, iptpath, optpath, weights_file,
                    etype=None, days=None, start_date=None,
                    end_date=None, fileprefix='', verbose=False):
@@ -203,11 +213,10 @@ class FpoNHM:
         # Linux. Adding sorted makes result consistent glob is here
         # because original NHM had multiple shapefiles
         filenames = sorted(self.iptpath.glob('*.shp'))
-        objs = []
-        for f in progressbar.progressbar(filenames):
-            objs.append(geopandas.read_file(f))
-        self.gdf = pd.concat(objs, sort=True).pipe(geopandas.GeoDataFrame)
-        self.gdf.reset_index(drop=True, inplace=True)
+        t0 = perf_counter()
+        self.read_files(filenames)
+        t1 = perf_counter()
+        print("read {:n} files in {:.0f} seconds".format(self.q.qsize(), t1 - t0))
 
         if self.type == 'date':
             self.numdays = ((self.end_date - self.start_date).days + 1)
