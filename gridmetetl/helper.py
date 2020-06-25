@@ -19,15 +19,15 @@ def np_get_wval(ndata, wghts, hru_id=0):
     """
     Returns weighted average of ndata with weights = grp
     1) mdata = the subset of values associated with the gridMET IDs that are mapped to hru_id.
-    2) Some of these values may have nans if the gridMET ID is outside of CONUS so only return values
+    2) Some of these values may have NaNs if the gridMET ID is outside of CONUS so only return values
     that are inside of CONUS
-    3) this means that HRUs that are entirely outside of CONUS will return nans which will ultimately,
+    3) this means that HRUs that are entirely outside of CONUS will return NaNs which will ultimately,
     outside of this function get assigned zero's.
     4) the value is assigned the weighted average
     :param ndata: float array of data values
     :param wghts: float array of weights
     :param hru_id HRU ID number
-    :return: numpy weighted averaged - masked to deal with nans associated with
+    :return: numpy weighted averaged - masked to deal with NaNs associated with
             ndata that is outside of the CONUS.
     """
     mdata = np.ma.masked_array(ndata, np.isnan(ndata))

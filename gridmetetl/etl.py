@@ -73,7 +73,7 @@ class FpoNHM:
         self.dssrad = None
         self.ds = None
 
-        # Geopandas dataframe that will hold HRU id and geometry
+        # Geopandas dataframe that will hold HRU ID and geometry
         self.gdf = None
         self.gdf1 = None
 
@@ -367,8 +367,8 @@ class FpoNHM:
                     weight_id_rows = self.unique_hru_ids.get_group(tindex[i])
                     tw = weight_id_rows.w.values
                     tgid = weight_id_rows.grid_ids.values
-                    # if one var is nan all are nan. getaverage returns nan if 1 value is nan
-                    # np_get_wval return nan if all values are nan otherwise returns the
+                    # if one var. is NaN, all are NaN. getaverage() returns nan if 1 value is NaN
+                    # np_get_wval return nan if all values are NaN otherwise returns the
                     # weighted masked val.  So assumption here is return a value for partially
                     # weighted HRUs
                     if 'tmax' in self.vars:
