@@ -3,7 +3,7 @@ from gridmetetl.etl import FpoNHM
 import argparse
 import datetime
 from pathlib import Path
-
+from time import perf_counter
 
 def valid_date(s):
     try:
@@ -137,16 +137,24 @@ def main(parser, args):
         print('instantiated', flush=True)
 
     try:
+        t0 = perf_counter()
         ready = fp.initialize(gm_vars, idir, odir, wght_file,
                               etype=extract_type, days=numdays,
                               start_date=startdate, end_date=enddate,
                               fileprefix=file_prefix, verbose=verbose)
+        t1 = perf_counter()
+        if verbose:
+            print("initialize(): {:.0f} seconds".format(t1 - t0))
+            
         if ready:
             if verbose:
                 print('initalized\n', flush=True)
                 print('running', flush=True)
+            t0 = perf_counter()
             fp.run_weights()
+            t1 = perf_counter()
             if verbose:
+                print("run_weights(): {:.0f} seconds".format(t1 - t0))
                 print('finished running', flush=True)
             fp.finalize()
             if verbose:
