@@ -205,8 +205,11 @@ class FpoNHM:
         self.gdf.reset_index(drop=True, inplace=True)
 
         if verbose:
-            print(f'the shapefile filenames read:\n{str(filenames)}', flush=True)
-            print(f'the shapefile header is:\n{str(self.gdf.head())}', flush=True)
+            msg = 'in directory ' + str(filenames[0].parent) + ':'
+            for f in filenames:
+                msg = msg + ' ' + f.name + ','
+            print(msg[:-1], flush=True)
+            print(f'shapefile header is:\n{str(self.gdf.head())}', flush=True)
 
         if self.type == 'date':
             self.numdays = ((self.end_date - self.start_date).days + 1)
@@ -217,44 +220,58 @@ class FpoNHM:
             try:
                 if var == 'tmax':
                     # Maximum Temperature
-                    self.str_start, url, params = get_gm_url(self.type, 'tmax', self.numdays,
-                                                             self.start_date, self.end_date)
+                    self.str_start, url, params = get_gm_url(
+                        self.type, 'tmax', self.numdays,
+                        self.start_date, self.end_date
+                    )
                     self.write_extract_file(var, ncfile, url, params)
 
                 elif var == 'tmin':
                     # Minimum Temperature
-                    self.str_start, url, params = get_gm_url(self.type, 'tmin', self.numdays,
-                                                             self.start_date, self.end_date)
+                    self.str_start, url, params = get_gm_url(
+                        self.type, 'tmin', self.numdays,
+                        self.start_date, self.end_date
+                    )
                     self.write_extract_file(var, ncfile, url, params)
 
                 elif var == 'ppt':
                     # Precipitation
-                    self.str_start, url, params = get_gm_url(self.type, 'ppt', self.numdays,
-                                                             self.start_date, self.end_date)
+                    self.str_start, url, params = get_gm_url(
+                        self.type, 'ppt', self.numdays,
+                        self.start_date, self.end_date
+                    )
                     self.write_extract_file(var, ncfile, url, params)
 
                 elif var == 'rhmax':
                     # Maximum Relative Humidity
-                    self.str_start, url, params = get_gm_url(self.type, 'rhmax', self.numdays,
-                                                             self.start_date, self.end_date)
+                    self.str_start, url, params = get_gm_url(
+                        self.type, 'rhmax', self.numdays,
+                        self.start_date, self.end_date
+                    )
                     self.write_extract_file(var, ncfile, url, params)
 
                 elif var == 'rhmin':
                     # Minimum Relative Humidity
-                    self.str_start, url, params = get_gm_url(self.type, 'rhmin', self.numdays,
-                                                             self.start_date, self.end_date)
+                    self.str_start, url, params = get_gm_url(
+                        self.type, 'rhmin', self.numdays,
+                        self.start_date, self.end_date
+                    )
                     self.write_extract_file(var, ncfile, url, params)
 
                 elif var == 'ws':
                     # Mean daily Wind Speed
-                    self.str_start, url, params = get_gm_url(self.type, 'ws', self.numdays,
-                                                             self.start_date, self.end_date)
+                    self.str_start, url, params = get_gm_url(
+                        self.type, 'ws', self.numdays,
+                        self.start_date, self.end_date
+                    )
                     self.write_extract_file(var, ncfile, url, params)
 
                 elif var == 'srad':
                     # Surface downwelling shortwave flux in air
-                    self.str_start, url, params = get_gm_url(self.type, 'srad', self.numdays,
-                                                             self.start_date, self.end_date)
+                    self.str_start, url, params = get_gm_url(
+                        self.type, 'srad', self.numdays,
+                        self.start_date, self.end_date
+                    )
                     self.write_extract_file(var, ncfile, url, params)
 
             except HTTPError as http_err:
@@ -267,7 +284,8 @@ class FpoNHM:
                 sys.exit(f'Other error occured: {err}')
             else:
                 if verbose:
-                    print(f'gridMET variable {var} retrieved: {ncfile[-1]}', flush=True)
+                    print(f'gridMET variable {var} retrieved: {ncfile[-1]}',
+                          flush=True)
         self.ds = xr.open_mfdataset(ncfile, combine='by_coords')
 
         self.lat_h = self.ds['lat']
