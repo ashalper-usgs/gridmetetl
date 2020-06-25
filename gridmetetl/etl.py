@@ -1,10 +1,9 @@
 """Main module."""
-import concurrent.futures
 import geopandas
 import netCDF4
 import numpy as np
 import pandas as pd
-import queue
+import progressbar
 import requests
 import sys
 import xarray as xr
@@ -14,7 +13,6 @@ from netCDF4 import default_fillvals, Dataset
 from numpy import arange, dtype, float32, zeros, asarray
 from pathlib import Path
 from requests.exceptions import HTTPError
-from time import perf_counter
 
 class FpoNHM:
     """ Class for fetching climate data and parsing into netCDF
@@ -128,9 +126,6 @@ class FpoNHM:
         # Starting date based on numdays
         self.str_start = None
 
-        # multithreading infrastructure
-        self.q = queue.Queue()
-
     def write_extract_file(self, ivar, incfile, url, params):
         file = requests.get(url, params=params)
         file.raise_for_status()
@@ -140,16 +135,6 @@ class FpoNHM:
         with open(tfile, 'wb') as fh:
             fh.write(file.content)
         fh.close()
-
-    def read_file(self, filename):
-        self.q.put(geopandas.read_file(filename))
-        print(f'read {str(filename)}')
-    
-    def read_files(self, filenames):
-        with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
-            executor.map(self.read_file, filenames)
-        self.gdf = pd.concat(list(self.q.queue), sort=True).pipe(geopandas.GeoDataFrame)
-        self.gdf.reset_index(drop=True, inplace=True)
 
     def initialize(self, ivars, iptpath, optpath, weights_file,
                    etype=None, days=None, start_date=None,
@@ -213,10 +198,15 @@ class FpoNHM:
         # Linux. Adding sorted makes result consistent glob is here
         # because original NHM had multiple shapefiles
         filenames = sorted(self.iptpath.glob('*.shp'))
-        t0 = perf_counter()
-        self.read_files(filenames)
-        t1 = perf_counter()
-        print("read {:n} files in {:.0f} seconds".format(self.q.qsize(), t1 - t0))
+        objs = []
+        for f in progressbar.progressbar(filenames):
+            objs.append(geopandas.read_file(f))
+        self.gdf = pd.concat(objs, sort=True).pipe(geopandas.GeoDataFrame)
+        self.gdf.reset_index(drop=True, inplace=True)
+
+        if verbose:
+            print(f'the shapefile filenames read:\n{str(filenames)}', flush=True)
+            print(f'the shapefile header is:\n{str(self.gdf.head())}', flush=True)
 
         if self.type == 'date':
             self.numdays = ((self.end_date - self.start_date).days + 1)
