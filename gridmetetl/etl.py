@@ -136,25 +136,11 @@ class FpoNHM:
             fh.write(file.content)
         fh.close()
 
-    def initialize(self, ivars, iptpath, optpath, weights_file,
-                   etype=None, days=None, start_date=None,
-                   end_date=None, fileprefix='', verbose=False):
+    def load_shapes(self, ivars, iptpath, optpath, weights_file,
+                    etype, start_date=None, end_date=None, days=None,
+                    fileprefix='', verbose=False):
         """
-        Initialize the fp_ohm class:
-            1) initialize geopandas dataframe of concatenated hru_shapefiles
-            2) initialize climate data using xarray
-        :param ivars: list of vars to extract.  limited to ['tmax', 'tmin', 'ppt', 'rhmax', 'rhmin', 'ws', 'srad']
-        :param iptpath: Input path, downloaded gridMET files will be saved here. Must also contain shapefile used to
-                        generate the weights file.
-        :param optpath: Path to write newly generated netCDF file containing values for vars for each HRU
-        :param weights_file: Weights file, based on shapefile in iptpath that was used to generate weights file
-        :param etype: extraction time, can be days or date
-        :param days: if extraction type == days, then # days to extract from most recently available date
-        :param start_date: if extraction type date then start date in 'YYYY-MM-DD"
-        :param end_date: if extraction type date then end date in 'YYYY-MM-DD"
-        :param fileprefix: String to add to both downloaded gridMET data and mapped HRU file
-
-        :return: success or failure
+        Initialize geopandas dataframe of concatenated HRU shapefiles.
         """
         self.vars = ivars
         self.iptpath = Path(iptpath)
@@ -210,7 +196,23 @@ class FpoNHM:
                 msg = msg + ' ' + f.name + ','
             print(msg[:-1], flush=True)
             print(f'shapefile header is:\n{str(self.gdf.head())}', flush=True)
+        
+    def initialize(self, verbose=False):
+        """
+            Initialize climate data using xarray
+        :param ivars: list of vars to extract.  limited to ['tmax', 'tmin', 'ppt', 'rhmax', 'rhmin', 'ws', 'srad']
+        :param iptpath: Input path, downloaded gridMET files will be saved here. Must also contain shapefile used to
+                        generate the weights file.
+        :param optpath: Path to write newly generated netCDF file containing values for vars for each HRU
+        :param weights_file: Weights file, based on shapefile in iptpath that was used to generate weights file
+        :param etype: extraction time, can be days or date
+        :param days: if extraction type == days, then # days to extract from most recently available date
+        :param start_date: if extraction type date then start date in 'YYYY-MM-DD"
+        :param end_date: if extraction type date then end date in 'YYYY-MM-DD"
+        :param fileprefix: String to add to both downloaded gridMET data and mapped HRU file
 
+        :return: success or failure
+        """
         if self.type == 'date':
             self.numdays = ((self.end_date - self.start_date).days + 1)
 
