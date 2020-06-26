@@ -1,7 +1,7 @@
 """Console script for gridmetetl."""
-from gridmetetl.etl import FpoNHM
 import argparse
 import datetime
+from gridmetetl.etl import FpoNHM
 from pathlib import Path
 from time import perf_counter
 
