@@ -79,7 +79,9 @@ def get_extraction(parser, args):
     startdate = None
     enddate = None
     if all(i is not None for i in [args.period, args.days]):
-        parser.error('Either the --days or --period option must be specified not both')
+        parser.error(
+            'Either the --days or --period option must be specified not both'
+        )
     if all(i is None for i in [args.period, args.days]):
         parser.error('Either the --days or --period option must be specified')
     if args.extract_type is not None:
@@ -88,15 +90,21 @@ def get_extraction(parser, args):
             if args.days is not None:
                 numdays = args.days
             else:
-                parser.error('if -t --extract_type == days then -d must be specified')
+                parser.error(
+                    'if -t --extract_type == days then -d must be specified'
+                )
         elif args.extract_type == 'date':
             if args.period is not None:
                 startdate = args.period[0]
                 enddate = args.period[1]
                 if startdate >= enddate:
-                    parser.error('when using -p the first date must occur before the second')
+                    parser.error(
+                    'when using -p the first date must occur before the second'
+                    )
             else:
-                parser.error('if -t --extract_type == dates then -p must be specified')
+                parser.error(
+                    'if -t --extract_type == dates then -p must be specified'
+                )
     else:
         parser.error('--extract_type must be specified')
 
@@ -122,7 +130,9 @@ def main(parser, args):
     file_prefix = None
     gm_vars = None
 
-    extract_type, numdays, startdate, enddate = get_extraction(my_parser, my_args)
+    extract_type, numdays, startdate, enddate = get_extraction(
+        my_parser, my_args
+    )
     idir = my_args.inpath
     odir = my_args.outpath
     wght_file = my_args.weightsfile
@@ -138,10 +148,11 @@ def main(parser, args):
 
     try:
         t0 = perf_counter()
-        ready = fp.initialize(gm_vars, idir, odir, wght_file,
-                              etype=extract_type, days=numdays,
-                              start_date=startdate, end_date=enddate,
-                              fileprefix=file_prefix, verbose=verbose)
+        fp.load_shapes(gm_vars, idir, odir, wght_file,
+                       etype=extract_type, days=numdays,
+                       start_date=startdate, end_date=enddate,
+                       fileprefix=file_prefix, verbose=verbose)
+        ready = fp.initialize(verbose)
         t1 = perf_counter()
         if verbose:
             print("initialize(): {:.0f} seconds".format(t1 - t0))
@@ -162,7 +173,8 @@ def main(parser, args):
             return 0
         else:
             if extract_type == 'days':
-                print('gridMET not updated continue with numdays -1', flush=True)
+                print('gridMET not updated continue with numdays -1',
+                      flush=True)
                 fp.setnumdays(numdays - 1)
                 if verbose:
                     print('initalized\n', flush=True)
